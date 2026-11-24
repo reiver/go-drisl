@@ -3,6 +3,7 @@ package drisl_test
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"math"
 	"math/big"
 	"reflect"
@@ -173,7 +174,7 @@ func TestMarshal_errors(t *testing.T) {
 
 		_, err := drisl.Marshal(test.Value)
 
-		if test.Expected != err {
+		if !errors.Is(err, test.Expected) {
 			t.Errorf("For test #%d, the actual error is not what was expected.", testNumber)
 			t.Logf("EXPECTED: %v", test.Expected)
 			t.Logf("ACTUAL:   %v", err)

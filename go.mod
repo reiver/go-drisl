@@ -4,11 +4,14 @@ go 1.24.3
 
 require (
 	codeberg.org/reiver/go-erorr v0.0.0-20260509033006-5ff6fb3009f8
+	github.com/reiver/go-cid v0.0.0-20261124135123-7d4e5718d2e1
 	github.com/reiver/go-rfc8949 v0.0.0-20261123133906-3508b28c338a
 )
 
 require (
 	codeberg.org/reiver/go-field v0.0.0-20260509032856-5b4f754dc77e // indirect
+	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/reiver/go-calltrace v0.0.0-20251216205616-3931a8c7b154 // indirect
 	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39 // indirect
+	lukechampine.com/blake3 v1.5.3 // indirect
 )

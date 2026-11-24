@@ -140,7 +140,7 @@ func marshalFloat64(value float64) ([]byte, error) {
 
 func marshalCID(cid CID) ([]byte, error) {
 	if err := cid.Validate(); nil != err {
-		return nil, err
+		return nil, invalidCID(err)
 	}
 
 	// For historical reasons, the binary CID is prefixed with a 0x00 byte.

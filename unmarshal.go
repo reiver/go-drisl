@@ -235,7 +235,7 @@ func unmarshalTagged(h head.Head, p []byte) (any, []byte, error) {
 
 	var cid CID = CID(content[1:])
 	if err := cid.Validate(); nil != err {
-		return nil, p, err
+		return nil, p, invalidCID(err)
 	}
 
 	return cid, rest, nil

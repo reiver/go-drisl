@@ -2,6 +2,7 @@ package drisl_test
 
 import (
 	"encoding/hex"
+	"errors"
 	"math/big"
 	"reflect"
 	"testing"
@@ -277,7 +278,7 @@ func TestUnmarshal_errors(t *testing.T) {
 			expected := test.Expected
 			actual   := err
 
-			if expected != actual {
+			if !errors.Is(actual, expected) {
 				t.Errorf("For test #%d, the actual error is not what was expected.", testNumber)
 				t.Logf("EXPECTED: %v", expected)
 				t.Logf("ACTUAL:   %v", actual)

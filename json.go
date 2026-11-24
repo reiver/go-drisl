@@ -80,7 +80,7 @@ func toJSONValue(value any, depth int) (any, error) {
 
 	case CID:
 		if err := casted.Validate(); nil != err {
-			return nil, err
+			return nil, invalidCID(err)
 		}
 		return map[string]any{
 			"$link": casted.String(),

@@ -1,7 +1,10 @@
 package drisl_test
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/reiver/go-cid"
 
 	"github.com/reiver/go-drisl"
 )
@@ -27,14 +30,14 @@ func TestCID_String(t *testing.T) {
 
 	for testNumber, test := range tests {
 
-		var cid drisl.CID = drisl.CID(mustHex(t, test.CID))
+		var value drisl.CID = drisl.CID(mustHex(t, test.CID))
 
-		if err := cid.Validate(); nil != err {
+		if err := value.Validate(); nil != err {
 			t.Errorf("For test #%d, did not expect an error but actually got one: (%T) %s", testNumber, err, err)
 			continue
 		}
 
-		actual := cid.String()
+		actual := value.String()
 
 		if test.Expected != actual {
 			t.Errorf("For test #%d, the actual CID string is not what was expected.", testNumber)
@@ -45,6 +48,7 @@ func TestCID_String(t *testing.T) {
 	}
 }
 
+// drisl.CID is cid.CID — so validating one gives go-cid's errors.
 func TestCID_Validate_errors(t *testing.T) {
 
 	tests := []struct{
@@ -53,21 +57,21 @@ func TestCID_Validate_errors(t *testing.T) {
 	}{
 		{
 			CID:      nil,
-			Expected: drisl.ErrNilCID,
+			Expected: cid.ErrNilCID,
 		},
 		{
 			CID:      drisl.CID{},
-			Expected: drisl.ErrInvalidCID,
+			Expected: cid.ErrBadLength,
 		},
 		{
 			// codec 0x70 (dag-pb) is not a DASL codec
 			CID:      drisl.CID(mustHex(t, "01701220e9822efc7c48027a5429fd6b4ea0ce4f0bd76a3a9e1d0b7f0abae39f1d2e1a4f")),
-			Expected: drisl.ErrInvalidCID,
+			Expected: cid.ErrBadCodec,
 		},
 		{
 			// CIDv0
 			CID:      drisl.CID(mustHex(t, "122022ad631c69ee983095b5b8acd029ff94aff1dc6c48837878589a92b90dfea317")),
-			Expected: drisl.ErrInvalidCID,
+			Expected: cid.ErrBadLength,
 		},
 	}
 
@@ -75,11 +79,31 @@ func TestCID_Validate_errors(t *testing.T) {
 
 		actual := test.CID.Validate()
 
-		if test.Expected != actual {
+		if !errors.Is(actual, test.Expected) {
 			t.Errorf("For test #%d, the actual error is not what was expected.", testNumber)
 			t.Logf("EXPECTED: %v", test.Expected)
 			t.Logf("ACTUAL:   %v", actual)
 			continue
+		}
+	}
+}
+
+// Encoding, decoding, and rendering an invalid CID give an error that is both drisl.ErrInvalidCID and go-cid's reason.
+func TestCID_invalid_errors(t *testing.T) {
+
+	// codec 0x70 (dag-pb) is not a DASL codec
+	var invalid drisl.CID = drisl.CID(mustHex(t, "01701220e9822efc7c48027a5429fd6b4ea0ce4f0bd76a3a9e1d0b7f0abae39f1d2e1a4f"))
+
+	_, marshalErr := drisl.Marshal(invalid)
+	_, unmarshalErr := drisl.Unmarshal(mustHex(t, "d82a58250001701220e9822efc7c48027a5429fd6b4ea0ce4f0bd76a3a9e1d0b7f0abae39f1d2e1a4f"))
+	_, jsonErr := drisl.ToJSON(invalid)
+
+	for name, err := range map[string]error{"Marshal": marshalErr, "Unmarshal": unmarshalErr, "ToJSON": jsonErr} {
+		if !errors.Is(err, drisl.ErrInvalidCID) {
+			t.Errorf("For %s, expected drisl.ErrInvalidCID but actually got: %v", name, err)
+		}
+		if !errors.Is(err, cid.ErrBadCodec) {
+			t.Errorf("For %s, expected cid.ErrBadCodec but actually got: %v", name, err)
 		}
 	}
 }
